@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quyen</title>
+    <style>
+      :root {
+        --mascot-width: 240px;
+        /* The atlas cells are 320x383, so the frame has to keep that ratio. */
+        --mascot-height: calc(var(--mascot-width) * 383 / 320);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 50% 0%, #f7f4ef, #e7e2da);
+        color: #1c1a17;
+        font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 48px 24px;
+        text-align: center;
+      }
+
+      .mascot {
+        width: var(--mascot-width);
+        height: var(--mascot-height);
+        background-image: url('mascots/quyen.png');
+        background-size: 300% 300%;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+        filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.18));
+      }
+
+      h1 {
+        margin: 16px 0 0;
+        font-size: 40px;
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        margin: 0;
+        color: #6c665c;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mascot" role="img" aria-label="Quyen, watching the cursor"></div>
+      <h1>Quyen</h1>
+      <p>Move your cursor around &mdash; Quyen follows.</p>
+    </main>
+
+    <script>
+      const mascot = document.querySelector('.mascot')
+
+      // Row-major cell indices on the 3x3 sheet, clockwise from the right,
+      // matching atan2 with y pointing down.
+      const CLOCKWISE = [5, 8, 7, 6, 3, 0, 1, 2]
+      const SECTOR = (Math.PI * 2) / CLOCKWISE.length
+      const HYSTERESIS = 0.12
+      const DEAD_ZONE = 70
+      const CENTER = 4
+
+      let sector = -1
+      let pointer = null
+
+      const show = (index) => {
+        mascot.style.backgroundPosition = `${(index % 3) * 50}% ${Math.floor(index / 3) * 50}%`
+      }
+
+      const wrap = (angle) => Math.atan2(Math.sin(angle), Math.cos(angle))
+
+      const aim = () => {
+        if (!pointer) return
+
+        const box = mascot.getBoundingClientRect()
+        const dx = pointer.x - (box.left + box.width / 2)
+        const dy = pointer.y - (box.top + box.height / 2)
+
+        if (Math.hypot(dx, dy) < DEAD_ZONE) {
+          sector = -1
+          show(CENTER)
+          return
+        }
+
+        // Hold the current sector until the pointer is well past its edge.
+        const angle = Math.atan2(dy, dx)
+        if (sector !== -1 && Math.abs(wrap(angle - sector * SECTOR)) < SECTOR / 2 + HYSTERESIS) {
+          return
+        }
+
+        sector = (Math.round(angle / SECTOR) + CLOCKWISE.length) % CLOCKWISE.length
+        show(CLOCKWISE[sector])
+      }
+
+      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        window.addEventListener(
+          'pointermove',
+          (event) => {
+            pointer = { x: event.clientX, y: event.clientY }
+            aim()
+          },
+          { passive: true },
+        )
+        window.addEventListener('scroll', aim, { passive: true })
+      }
+    </script>
+  </body>
+</html>

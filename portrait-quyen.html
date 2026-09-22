@@ -92,60 +92,9 @@
       <p>This page needs a mouse cursor to work.</p>
     </div>
 
+    <script src="scripts/mascot.js"></script>
     <script>
-      const mascot = document.querySelector('.mascot')
-
-      // Row-major cell indices on the 3x3 sheet, clockwise from the right,
-      // matching atan2 with y pointing down.
-      const CLOCKWISE = [5, 8, 7, 6, 3, 0, 1, 2]
-      const SECTOR = (Math.PI * 2) / CLOCKWISE.length
-      const HYSTERESIS = 0.12
-      const DEAD_ZONE = 70
-      const CENTER = 4
-
-      let sector = -1
-      let pointer = null
-
-      const show = (index) => {
-        mascot.style.backgroundPosition = `${(index % 3) * 50}% ${Math.floor(index / 3) * 50}%`
-      }
-
-      const wrap = (angle) => Math.atan2(Math.sin(angle), Math.cos(angle))
-
-      const aim = () => {
-        if (!pointer) return
-
-        const box = mascot.getBoundingClientRect()
-        const dx = pointer.x - (box.left + box.width / 2)
-        const dy = pointer.y - (box.top + box.height / 2)
-
-        if (Math.hypot(dx, dy) < DEAD_ZONE) {
-          sector = -1
-          show(CENTER)
-          return
-        }
-
-        // Hold the current sector until the pointer is well past its edge.
-        const angle = Math.atan2(dy, dx)
-        if (sector !== -1 && Math.abs(wrap(angle - sector * SECTOR)) < SECTOR / 2 + HYSTERESIS) {
-          return
-        }
-
-        sector = (Math.round(angle / SECTOR) + CLOCKWISE.length) % CLOCKWISE.length
-        show(CLOCKWISE[sector])
-      }
-
-      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-        window.addEventListener(
-          'pointermove',
-          (event) => {
-            pointer = { x: event.clientX, y: event.clientY }
-            aim()
-          },
-          { passive: true },
-        )
-        window.addEventListener('scroll', aim, { passive: true })
-      }
+      Mascot.follow(document.querySelector('.mascot'))
     </script>
   </body>
 </html>

@@ -10,9 +10,8 @@ at your cursor.
 characters/      source photos (front-facing shot of the character)
 mascots/         generated 3x3 sprite sheets (atlases used by the pages)
 scripts/         mascot.js -- the cursor tracking shared by every demo page
+pages/           the demos: portrait-*.html (single mascot), wall-*.html (grid)
 index.html       index page listing the demos
-portrait-*.html  single-mascot demo, one per character
-wall-*.html      grid-of-mascots demo, one per character
 prompt-generate-directions.md   prompt used to generate the 9-direction image
 ```
 

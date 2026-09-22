@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cuong &times; n</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        background: #e7e2da;
+      }
+
+      #wall {
+        display: grid;
+        gap: 0;
+      }
+
+      /* The component sizes a square box, but the atlas cells are 320x312 -- override
+         the inline height so the head is not squashed. The tiles are inert, so its
+         pointer cursor would be a lie too. */
+      .cuong {
+        height: var(--tile-height) !important;
+        cursor: inherit !important;
+      }
+
+      .desktop-only {
+        display: none;
+      }
+
+      /* No hoverable pointer means no cursor to follow, so the wall is pointless. */
+      @media (hover: none), (pointer: coarse) {
+        #wall {
+          display: none;
+        }
+
+        .desktop-only {
+          display: grid;
+          gap: 8px;
+          padding: 32px 24px;
+          text-align: center;
+          color: #1c1a17;
+          font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+
+        .desktop-only strong {
+          font-size: 22px;
+          letter-spacing: -0.01em;
+        }
+
+        .desktop-only span {
+          color: #6c665c;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- inert: there is no reactions sheet for Cuong, so the boop stays switched off. -->
+    <div id="wall" role="img" aria-label="A wall of Cuongs, all watching the cursor" inert></div>
+
+    <div class="desktop-only">
+      <strong>Please open this on a computer</strong>
+      <span>This page needs a mouse cursor to work.</span>
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.3.1",
+          "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?external=react",
+          "page-mascot": "https://esm.sh/page-mascot@0.1.0?external=react"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import React from 'react'
+      import { createRoot } from 'react-dom/client'
+      import { Mascot } from 'page-mascot'
+
+      const SHEET = '../mascots/cuong.png'
+      const CELL_RATIO = 312 / 320
+      const DEFAULT_TILE = 150
+
+      const wall = document.getElementById('wall')
+
+      // ?cols=8&rows=5 pins the grid; ?tile=120 only sets the width and fills the viewport.
+      const params = new URLSearchParams(location.search)
+      const asNumber = (key) => {
+        const value = Number(params.get(key))
+        return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0
+      }
+
+      const layout = () => {
+        const fixedCols = asNumber('cols')
+        const fixedRows = asNumber('rows')
+        const tileHint = asNumber('tile') || DEFAULT_TILE
+
+        const cols = fixedCols || Math.max(1, Math.ceil(innerWidth / tileHint))
+        const width = fixedCols ? tileHint : innerWidth / cols
+        const height = width * CELL_RATIO
+        const rows = fixedRows || Math.max(1, Math.ceil(innerHeight / height))
+
+        return { cols, rows, width, height }
+      }
+
+      function Wall() {
+        const [grid, setGrid] = React.useState(layout)
+
+        React.useEffect(() => {
+          const onResize = () => setGrid(layout())
+          addEventListener('resize', onResize)
+          return () => removeEventListener('resize', onResize)
+        }, [])
+
+        React.useLayoutEffect(() => {
+          wall.style.gridTemplateColumns = `repeat(${grid.cols}, ${grid.width}px)`
+          wall.style.gridTemplateRows = `repeat(${grid.rows}, ${grid.height}px)`
+          wall.style.setProperty('--tile-height', `${grid.height}px`)
+        }, [grid])
+
+        return Array.from({ length: grid.cols * grid.rows }, (_, i) =>
+          React.createElement(Mascot, {
+            key: i,
+            directions: SHEET,
+            // Required by the component; never visible because the boop is disabled.
+            reactions: SHEET,
+            size: grid.width,
+            label: 'Cuong',
+            className: 'cuong',
+          }),
+        )
+      }
+
+      // Only a fine pointer has a cursor to follow, and the wall is nothing without one.
+      if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        createRoot(wall).render(React.createElement(Wall))
+      }
+    </script>
+  </body>
+</html>

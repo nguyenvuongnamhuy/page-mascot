@@ -20,7 +20,7 @@
         display: grid;
         place-items: center;
         background: #e7e2da;
-        cursor: url('assets/cursor.png') 6 4, auto;
+        cursor: url('../assets/cursor.png') 6 4, auto;
       }
 
       #wall {
@@ -29,7 +29,7 @@
       }
 
       .mascot {
-        background-image: url('mascots/quyen.png');
+        background-image: url('../mascots/quyen.png');
         background-size: 300% 300%;
         background-repeat: no-repeat;
         background-position: 50% 50%;
@@ -73,7 +73,7 @@
       <span>This page needs a mouse cursor to work.</span>
     </div>
 
-    <script src="scripts/mascot.js"></script>
+    <script src="../scripts/mascot.js"></script>
     <script>
       Mascot.wall(document.getElementById('wall'), { cellRatio: 383 / 320 })
     </script>

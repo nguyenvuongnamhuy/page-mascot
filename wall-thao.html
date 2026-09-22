@@ -33,10 +33,44 @@
         background-repeat: no-repeat;
         background-position: 50% 50%;
       }
+
+      .desktop-only {
+        display: none;
+      }
+
+      /* No hoverable pointer means no cursor to follow, so the wall is pointless. */
+      @media (hover: none), (pointer: coarse) {
+        #wall {
+          display: none;
+        }
+
+        .desktop-only {
+          display: grid;
+          gap: 8px;
+          padding: 32px 24px;
+          text-align: center;
+          color: #1c1a17;
+          font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+
+        .desktop-only strong {
+          font-size: 22px;
+          letter-spacing: -0.01em;
+        }
+
+        .desktop-only span {
+          color: #6c665c;
+        }
+      }
     </style>
   </head>
   <body>
     <div id="wall" role="img" aria-label="A wall of Thaos, all watching the cursor"></div>
+
+    <div class="desktop-only">
+      <strong>Please open this on a computer</strong>
+      <span>This page needs a mouse cursor to work.</span>
+    </div>
 
     <script>
       const CELL_RATIO = 383 / 320
@@ -115,13 +149,12 @@
         }
       }
 
-      build()
-      addEventListener('resize', () => {
-        build()
-        aim()
-      })
-
       if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        build()
+        addEventListener('resize', () => {
+          build()
+          aim()
+        })
         addEventListener(
           'pointermove',
           (event) => {
